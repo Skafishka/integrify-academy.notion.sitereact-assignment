@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import countriesService from './services/db'
 import { Navbar, Container, Nav } from 'react-bootstrap'
-import { AllCountries } from './pages/allCountries'
-import { Country, SingleCountry } from './pages/country'
+import { AllCountries, SingleCountry } from './pages/allCountries'
+import { SearchCountry } from './pages/country'
 import { useField } from './hooks/useField'
 import { useCountry } from './hooks/useCountry'
 
@@ -12,6 +12,18 @@ const App = () => {
   const [name, setName] = useState('')
   const country = useCountry(name)
   const [countries, setAllCountries] = useState([])
+
+  const [currentPage, setCurrentPage] = useState(1)
+  const [countriesPerPage] = useState(15)
+
+  //Get current countries
+  const indexOfLastCountry = currentPage * countriesPerPage
+  const indexOfFirstCountry = indexOfLastCountry - countriesPerPage
+  const currentCountry = countries.slice(indexOfFirstCountry, indexOfLastCountry)
+
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  }
   
   const fetch = (e) => {
     e.preventDefault()
@@ -42,12 +54,12 @@ const App = () => {
             </form>
           </Container>
         </Navbar>
-        <Country country={country} />
-    </div>
+        <SearchCountry country={country} />
+      </div>
 
       <Routes>
-        <Route path="/" element={<AllCountries countries={countries} />} />
-        <Route path="/country/:id" element={<SingleCountry countries={countries} />} />
+        <Route path="/" element={<AllCountries countries={countries} countriesPerPage={countriesPerPage} paginate={paginate} currentCountry={currentCountry}/>} />
+        <Route path="/country/:id" element={<SingleCountry countries={currentCountry} />} />
       </Routes>
     </Router>
   )
